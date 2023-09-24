@@ -101,7 +101,9 @@ export default {
           wallet.name
         );
 
-        if (resWallet) {
+        console.log(resWallet, "reswall");
+
+        if (resWallet.address) {
           this.$toast.showMessage({
             message: `Wallet Connected Successfully`,
           });

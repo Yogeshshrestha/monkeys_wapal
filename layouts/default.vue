@@ -9,7 +9,18 @@
   </v-app>
 </template>
 <script>
-export default {};
+export default {
+  mounted() {
+    if (process.client) {
+      try {
+        const wallet = JSON.parse(localStorage.getItem("wallet"));
+        if (wallet) {
+          this.$store.dispatch("wallet/connectWallet", wallet.name);
+        }
+      } catch {}
+    }
+  },
+};
 </script>
 <style>
 @import url("~/assets/style/main.css");

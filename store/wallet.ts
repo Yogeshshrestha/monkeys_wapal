@@ -1,9 +1,10 @@
+import { ActionContext } from "vuex";
 import {
   NetworkName,
   WalletCore,
   WalletName,
 } from "@aptos-labs/wallet-adapter-core";
-import { AptosClient } from "aptos";
+import { AptosClient, Network } from "aptos";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
 import { FewchaWallet } from "fewcha-plugin-wallet-adapter";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
@@ -31,11 +32,26 @@ const checkNetwork = () => {
     throw new Error(`Please Change your network to ${network}`);
   }
 };
-
+ 
 export const state = () => ({
   wallet: {},
-  
 });
+  // wallet: {
+  //   wallet: "",
+  //   walletAddress: "",
+  //   publicKey: "", 
+  //   resource: null,
+  // },
+
+
+// interface RootState { 
+//   wallet: {
+//     wallet: any;
+//     walletAddress: string;
+//     publicKey: string; 
+//     resource: any; 
+//   };
+// }
 
 export const mutations = {
   setWallet(state: any, payload: any) {
@@ -47,6 +63,7 @@ export const actions = {
   
   async connectWallet({ commit }: { commit: any }, payload: WalletName) {
     
+  //   // checkNetwork();
     if (!wallet.isConnected()) {
       await wallet.connect(payload);
     }
@@ -61,6 +78,41 @@ export const actions = {
 
     return wallet.account;
   },
+  // async connectWallet(
+  //   context: ActionContext<RootState, RootState>,
+  //   walletName: WalletName
+  // ) {
+  //   try {
+  //     await wallet.connect(walletName);
+  //     checkNetwork(); 
+  //     context.commit("setWallet", {
+  //       wallet: wallet.wallet?.name,
+  //       walletAddress: wallet.account?.address,
+  //       publicKey: Array.isArray(wallet.account?.publicKey)
+  //         ? wallet.account?.publicKey[0]
+  //         : wallet.account?.publicKey,
+  //       initializedAccountChange: true,
+  //     }); 
+ 
+  //     // this.$toast.showMessage({
+  //     //   message: `${context.state.wallet.wallet} Wallet Connected Successfully`,
+  //     // });
+  //     localStorage.setItem(
+  //       "wallet",
+  //       JSON.stringify({
+  //         wallet: wallet.wallet?.name,
+  //         walletAddress: wallet.account?.address,
+  //         publicKey: Array.isArray(wallet.account?.publicKey)
+  //           ? wallet.account?.publicKey[0]
+  //           : wallet.account?.publicKey,
+  //       })
+  //     );
+   
+      
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // },
   async disconnectWallet({ commit }: { commit: any }) {
     await wallet.disconnect();
     commit("setWallet", { address: "" });
@@ -72,12 +124,18 @@ export const actions = {
     {},
     {
       collection,
+      description,
       baseUri,
       price, 
+      royaltyNumerator,
+      royaltyDenominator 
     }: {
       collection: string;
+      description: string;
       baseUri: string;
       price: number; 
+      royaltyNumerator: any;
+      royaltyDenominator: any; 
     }
   ) {
     const payload = {
@@ -86,8 +144,11 @@ export const actions = {
       type_arguments: [],
       arguments: [
         collection,
+        description,
         baseUri,
-        price 
+        price,
+        royaltyNumerator,
+        royaltyDenominator  
       ],
     };
 
@@ -99,8 +160,10 @@ export const actions = {
   async addRankings(
     {},
     {
+      moduleOwner,
       rankings, 
     }: {
+      moduleOwner: any;
       rankings: any; 
     }
   ) {
@@ -109,26 +172,19 @@ export const actions = {
       type: "entry_function_payload",
       type_arguments: [],
       arguments: [
+        moduleOwner,
         rankings
       ],
     };
     const res = await executeTransaction(payload);
     return res;
   },
-  async mintSanctuary(
-    {},
-    {
-      receiverAddress, 
-    }: {
-      receiverAddress: any; 
-    }
-  ) {
+  async mintSanctuary({}) {
     const payload = {
       function: pid + "::sanctury::mint_sanctury",
       type: "entry_function_payload",
       type_arguments: [],
-      arguments: [
-        receiverAddress
+      arguments: [ 
       ],
     };
     const res = await executeTransaction(payload);

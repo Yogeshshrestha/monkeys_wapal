@@ -27,6 +27,7 @@
     />
   </div>
 </template>
+
 <script>
 export default {
   computed: {
@@ -34,16 +35,15 @@ export default {
       return this.$store.state.wallet.wallet;
     },
     getWalletAddress() {
-      if (this.wallet) {
+      const wallet = this.wallet;
+      if (wallet && wallet.address) {
         return (
-          this.wallet.address.substring(0, 9) +
+          wallet.address.substring(0, 9) +
           "..." +
-          this.wallet.address.substring(
-            this.wallet.address.length - 2,
-            this.wallet.address.length
-          )
+          wallet.address.substring(wallet.address.length - 2)
         );
       }
+      return "Not Connected";
     },
   },
   data() {

@@ -27,6 +27,7 @@
 
 <script>
 import { fetchWalletList } from "@/services/walletList";
+import walletList from "@/datas/data";
 
 export default {
   data() {
@@ -34,6 +35,7 @@ export default {
       isPaused: true,
       walletInList: false,
       minting: false,
+      mintingSuccess: false,
     };
   },
   computed: {
@@ -41,33 +43,32 @@ export default {
       return this.$store.state.wallet.wallet;
     },
   },
+
+  mounted() {
+    console.log(walletList, "waaa");
+  },
   methods: {
     async togglePaused() {
       const walletList = await fetchWalletList();
 
       this.walletInList = walletList.some(
-        (wallet) => wallet.address === wallet.address
+        (wallet) => wallet.address === this.wallet.address
       );
 
       console.log("Is fake wallet in list?", this.walletInList);
       this.minting = true;
 
-      const res = await this.$store.dispatch("wallet/mintSanctuary", {
-        receiverAddress: this.wallet,
-      });
+      try {
+        const res = await this.$store.dispatch("wallet/mintSanctuary");
 
-      if (res.success) {
-        this.$toast.showMessage({
-          message: "Minted Successfully",
-        });
-        const res = await this.$store.dispatch(
-          "walletStore/getSupplyAndMintedOfCollection",
-          {
-            resourceAccountAddress:
-              this.collection.candyMachine.resource_account,
-            candyMachineId: this.collection.candyMachine.candy_id,
-          }
-        );
+        if (res.success) {
+          this.mintingSuccess = true;
+          this.$toast.showMessage({
+            message: "Minted Successfully",
+          });
+        }
+      } catch (error) {
+        console.error("Minting Error:", error);
       }
 
       const article = document.querySelector("article");
@@ -75,6 +76,26 @@ export default {
         article.classList.toggle("paused");
         this.isPaused = !this.isPaused;
       }
+    },
+
+    async initiateCollection() {
+      const initiateCollectionRes = await this.$store.dispatch(
+        "wallet/initiateCollection",
+        {
+          collection: "CollectionName",
+          description: "CollectionDescription",
+          baseUri: "YourBaseUri",
+          price: 100,
+          royaltyNumerator: 1,
+          royaltyDenominator: 100,
+        }
+      );
+    },
+    async addRankings() {
+      const addRankingsRes = await this.$store.dispatch("wallet/addRankings", {
+        moduleOwner: "YourModuleOwner",
+        rankings: ["Address1", "Address2"],
+      });
     },
   },
 };
